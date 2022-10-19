@@ -3,23 +3,23 @@ import random
 
 import numpy as np
 
-# np.random.seed(42)
+np.random.seed(42)
 
 
-def sigmoid(z):
-    return 1 / (1 + np.exp(-z))
+class Sigmoid:
+    def __call__(self, x):
+        return 1 / (1 + np.exp(-x))
+
+    def backward(self, x):
+        return 1 / (1 + np.exp(-x)) * (1 - 1 / (1 + np.exp(-x)))
 
 
-def sigmoid_derivative(z):
-    return sigmoid(z) * (1 - sigmoid(z))
+class Relu:
+    def __call__(self, x):
+        return np.maximum(0, x)
 
-
-def relu(x):
-    return np.maximum(0, x)
-
-
-def relu_derivative(x):
-    return (x > 0).astype("float")
+    def backward(self, x):
+        return (x > 0).astype("float")
 
 
 class LinearLayer:
@@ -28,7 +28,7 @@ class LinearLayer:
         self.b = b
         self.grad_w = None
         self.grad_b = None
-        self.activation = activation
+        self.activation = activation()
         # print("activation =", self.activation)
         self.last_input = None
         self.last_out = None
@@ -47,11 +47,11 @@ class LinearLayer:
         # print("last_out =", self.last_out)
         # print("relu_derivative last_out =", relu_derivative(self.last_out))
         if self.activation:
-            grad = np.multiply(grad, relu_derivative(self.last_out))
+            grad = np.multiply(grad, self.activation.backward(self.last_out))
         # print("grad under multiply", grad)
 
         self.grad_w = np.transpose(self.last_input) @ grad
-        print("grad_w =", self.grad_w)
+        # print("grad_w =", self.grad_w)
         self.grad_b = np.sum(grad, axis=0)
         # print("grad =", grad, "transpose_w =", np.transpose(self.w))
         return grad @ np.transpose(self.w)
@@ -87,7 +87,7 @@ class Network:
         self.loss_function = loss_function
         self.layer_activation = layer_activation
         self.input_size = len(x_input[0])
-        self.act = [relu, relu, sigmoid]
+        self.act = [Relu, Relu, Sigmoid]
         self.layer_dims = [self.input_size, self.input_size*2, self.input_size, 1]
         self.weights, self.bias = self.initialize_parameters(self.layer_dims)
         self.x_input = x_input
@@ -100,9 +100,9 @@ class Network:
     def initialize_parameters(self, layer_dims):
         length = len(layer_dims)
         w = np.array([np.random.normal(loc=0.1, scale=0.1, size=(layer_dims[i-1], layer_dims[i])) for i in range(1, length)])
-        # print("w =", w)
+        print("w =", w)
         b = np.array([np.random.normal(loc=0, scale=0.05, size=(layer_dims[i])) for i in range(1, length)])
-        # print("b =", b)
+        print("b =", b)
         return w, b
 
     def forward_pass(self, x):
@@ -111,7 +111,7 @@ class Network:
         for layer in self.hidden_layer:
             layer_output = layer.calc(layer_output)
             # print("activation =", layer.activation)
-            # print("layer_output =", layer_output)
+            print("layer_output =", layer_output)
         # print("layer_output =", layer_output)
         return layer_output.ravel()
 
@@ -124,6 +124,7 @@ class Network:
         # print("grad =", grad, p, y)
         # print("grad in back_nn =", grad)
         for layer in reversed(self.hidden_layer):
+            print("backward_grad =", grad)
             grad = layer.backward(grad)
             layer.weights_update()
 
@@ -139,11 +140,11 @@ input_array = np.array([[10, 50],
                         [40, 40],
                         [30, 45]])
 real = np.array([1, 0, 0, 1, 1, 0, 0])
-network = Network(input_array, 1, activation=sigmoid, layer_activation=relu)
+network = Network(input_array, 1, activation=Sigmoid, layer_activation=Relu)
 
-for i in range(20):
+for i in range(5):
     a = network.forward_pass(input_array)
-    # print("a =", a)
+    print("a =", a)
     loss_w = Loss
     back = network.backward_pass(a, real, loss_function=loss_w)
     print("loss =", back)
