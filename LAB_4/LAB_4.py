@@ -102,7 +102,7 @@ class Network:
 
     def initialize_parameters(self, layer_dims):
         length = len(layer_dims)
-        w = np.array([np.random.normal(loc=0, scale=0.2, size=(layer_dims[i-1], layer_dims[i])) for i in range(1, length)])
+        w = [np.random.normal(loc=0, scale=0.2, size=(layer_dims[i-1], layer_dims[i])) for i in range(1, length)]
         b = [np.zeros((1, layer_dims[i])) for i in range(1, length)]
         return w, b
 
