@@ -13,6 +13,13 @@ def sigmoid(x):
 def sigmoid_for_el(arr):
     return np.array([sigmoid(el) for el in arr])
 
+class Sigmoid:
+    def __call__(self, x):
+        return 1 / (1 + math.exp(-x))
+
+    def backward(self, arr):
+        return np.array([self.__call__(el) for el in arr])
+
 
 class Loss:
     def forward(self, predict, y):
@@ -35,9 +42,11 @@ class Relu:
 def create_activation(activation):
     if not activation:
         return None
+    if activation.lower() == "relu":
+        return Relu()
 
     elif activation.lower() == "sigmoid":
-        return sigmoid
+        return Sigmoid
 
     else:
         print("Тут пока точ только relu работает")
@@ -67,6 +76,7 @@ class LinearLayer:
         # print("grad in output backward =", grad)
         # print("last_out =", self.last_out)
         # print("relu_derivative last_out =", relu_derivative(self.last_out))
+        print(self.activation)
         if self.activation:
             grad = np.multiply(grad, self.activation.backward(self.last_out))
         # print("grad under multiply", grad)
@@ -77,7 +87,7 @@ class LinearLayer:
         # print("grad =", grad, "transpose_w =", np.transpose(self.w))
         return grad @ np.transpose(self.w)
 
-    def weights_update(self, alpha=1e-4):
+    def weights_update(self, alpha=1e-2):
         self.w = self.w.astype("float64")
         self.w += alpha * self.grad_w
         self.b = self.b.astype("float")
@@ -132,26 +142,51 @@ class Network:
         # print("loss_value =", loss_value)
         return loss_value
 
+N = 200
+N2 = 25
 
-input_array = np.array([[10, 50],
-                        [20, 30],
-                        [25, 30],
-                        [20, 60],
-                        [15, 70],
-                        [40, 40],
-                        [30, 45]])
+n_pos = int(N // 2 + np.random.randint(-N2, N2))
+n_neg = int(N // 2 + np.random.randint(-N2, N2))
 
-real = np.array([1, 0, 0, 1, 1, 0, 0])
-network = Network(input_array, 1)
+pos_x = 1
+pos_y = 1
+
+neg_x = -1
+neg_y = -1
+
+pos_pairs = np.array([np.array(
+    [pos_x + np.random.normal(scale=0.2), pos_y + np.random.normal(scale=0.2)])
+    for i in range(0, n_pos)])
+
+pos_answers = np.array([1] * n_pos)
+
+neg_pairs = np.array([np.asarray(
+    [neg_x + np.random.normal(scale=0.2), neg_y + np.random.normal(scale=0.2)])
+    for i in range(0, n_neg)])
+neg_answers = np.array([0] * n_neg)
+
+x = np.vstack([pos_pairs, neg_pairs])
+y = np.hstack([pos_answers, neg_answers])
+
+# input_array = np.array([[10, 50],
+#                         [20, 30],
+#                         [25, 30],
+#                         [20, 60],
+#                         [15, 70],
+#                         [40, 40],
+#                         [30, 45]])
+#
+# real = np.array([1, 0, 0, 1, 1, 0, 0])
+network = Network(x, 1)
 
 for i in range(5):
-    a = network.forward_pass(input_array)
+    a = network.forward_pass(x)
     print("a =", a)
     loss_w = Loss
-    back = network.backward_pass(a, real, loss_function=loss_w)
+    back = network.backward_pass(a, y, loss_function=loss_w)
     print("loss =", back)
 
-print("forward_pass =", network.forward_pass([[20, 60]]))
+print("forward_pass =", sigmoid(network.forward_pass([[-1, -1]])))
 
 
 
