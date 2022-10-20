@@ -89,6 +89,13 @@ class LinearLayer:
 
 class Network:
     def __init__(self, x_input, layers_count, loss_function=None):
+        """
+        TODO: Сделать нормальную инициализацию параметров
+        :param x_input:
+        :param layers_count:
+        :param loss_function:
+        """
+
         self.layers_count = layers_count
         self.loss_function = loss_function
         self.input_size = len(x_input[0])
