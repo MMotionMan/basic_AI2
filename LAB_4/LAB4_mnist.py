@@ -163,40 +163,8 @@ class Network:
 
         return loss_value
 
-# N = 200
-# N2 = 25
-#
-# n_pos = int(N // 2 + np.random.randint(-N2, N2))
-# n_neg = int(N // 2 + np.random.randint(-N2, N2))
-#
-# pos_x = 1
-# pos_y = 1
-#
-# neg_x = -1
-# neg_y = -1
-#
-# pos_pairs = np.array([np.array(
-#     [pos_x + np.random.normal(scale=0.2), pos_y + np.random.normal(scale=0.2)])
-#     for i in range(0, n_pos)])
-#
-# pos_answers = np.array([1] * n_pos)
-#
-# neg_pairs = np.array([np.array(
-#     [neg_x + np.random.normal(scale=0.2), neg_y + np.random.normal(scale=0.2)])
-#     for i in range(0, n_neg)])
-# neg_answers = np.array([0] * n_neg)
-#
-# x = np.vstack([pos_pairs, neg_pairs])
-# print(len(x))
-# y = np.hstack([pos_answers, neg_answers])
-# print(x)
 
-
-
-
-#
-# print("forward_pass =", sigmoid_for_el(network.forward_pass([[-1, -1], [1, 1]])))
-
+# Load train_data
 train_data = pd.read_csv("mnist_train.csv")
 
 train_cols = train_data.columns[1:]
@@ -225,15 +193,25 @@ for epoch in range(5):
         x_batch, y_batch = batch
         proba = network.forward_pass(x_batch)
         loss_val = network.backward_pass(proba, y_batch, loss_function=loss_w)
-        test_test = x_batch
 
+# Load test data
+test_data = pd.read_csv("mnist_test.csv")
+test_cols = test_data.columns[1:]
+label_col = test_data.columns[0]
 
-a = softmax(network.forward_pass(test_test))
-print(a)
+labels = test_data[label_col].to_numpy()
+test = test_data[test_cols].to_numpy()
+
+s = 0
+for i in range(len(test)):
+    predict = network.forward_pass(test[i])
+    if np.argmax(predict) == labels[i]:
+        s += 1
+print(s/len(test))
 for i in range(9):
     pyplot.subplot(360 + 1 + i)
-    print(train[0])
-    pyplot.imshow(test_test[i].reshape(28, 28), cmap=pyplot.get_cmap('gray'))
+    print(test[0])
+    pyplot.imshow(test.reshape(28, 28), cmap=pyplot.get_cmap('gray'))
     pyplot.show()
 
 
