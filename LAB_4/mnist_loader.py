@@ -6,7 +6,7 @@ import numpy as np
 
 
 def load_data():
-    f = gzip.open('/Users/anatoliy/PycharmProjects/basic_AI2/LAB_4/mnist.pkl.gz', 'rb')
+    f = gzip.open('mnist.pkl.gz', 'rb')
     training_data, validation_data, test_data = load(f, encoding='latin1')
     f.close()
     return training_data, validation_data, test_data

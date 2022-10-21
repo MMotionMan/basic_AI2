@@ -178,7 +178,6 @@ for i in range(25):
 for el in network.hidden_layer:
     print("w =", el.w)
     print("b =", el.b)
-
 print("forward_pass =", sigmoid_for_el(network.forward_pass([[-1, -1], [1, 1]])))
 
 
