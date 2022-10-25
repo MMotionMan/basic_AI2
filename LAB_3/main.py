@@ -4,6 +4,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy import spatial
 import pandas as pd
+
+np.random.seed(42)
 np.seterr(divide='ignore', invalid='ignore')
 
 def cal_total_distance(routine):
